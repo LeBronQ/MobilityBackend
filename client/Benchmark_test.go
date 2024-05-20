@@ -8,30 +8,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/LeBronQ/Mobility"
+	"testing"
 
-	consulapi "github.com/hashicorp/consul/api"
 )
 
-func Discovery(serviceName string) []*consulapi.ServiceEntry {
-	config := consulapi.DefaultConfig()
-	config.Address = "127.0.0.1:8500"
-	client, err := consulapi.NewClient(config)
-	if err != nil {
-		fmt.Printf("consul client error: %v", err)
-	}
-	service, _, err := client.Health().Service(serviceName, "", false, nil)
-	if err != nil {
-		fmt.Printf("consul client get serviceIp error: %v", err)
-	}
-	return service
-}
-
-type ReqParams struct {
-	Node    Mobility.Node    `json:"node"`
-}
-
-
-func main() {
+func Benchmark(b *testing.B) {
 	se := Discovery("Default_Mobility")
 	port := se[0].Service.Port
 	address := se[0].Service.Address
@@ -51,7 +32,7 @@ func main() {
 	param := ReqParams{
 		Node: node,
 	}
-	fmt.Println(param)
+	
 	jsonData, err := json.Marshal(param)
 	if err != nil {
 		fmt.Println("Error encoding JSON:", err)
@@ -83,12 +64,12 @@ func main() {
 		return
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	_, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading response body:", err)
 		return
 	}
 
-	fmt.Println("Response:", string(body))
+	//fmt.Println("Response:", string(body))
 }
 
